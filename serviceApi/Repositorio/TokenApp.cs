@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Site.Models;
 
-namespace Site.Repositorio
+namespace serviceApi
 {
     public class TokenApp
     {
@@ -20,6 +19,11 @@ namespace Site.Repositorio
         {
             db.Tokens.Add(token);
             db.SaveChanges();
+        }
+
+        public bool Get()
+        {
+            return true;
         }
 
         public Token Get(string usuario)

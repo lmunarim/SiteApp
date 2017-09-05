@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
-using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.Security;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
 using Newtonsoft.Json;
 using Site.Models;
-using Site.Repositorio;
 
 namespace Site.Controllers
 {
@@ -54,7 +46,7 @@ namespace Site.Controllers
                 var pairs = new List<KeyValuePair<string, string>>
                     {
                         new KeyValuePair<string, string>( "grant_type", "password" ),
-                        new KeyValuePair<string, string>( "username", model.Email),
+                        new KeyValuePair<string, string>( "username", model.Usuario),
                         new KeyValuePair<string, string> ( "Password", model.Password )
                     };
                 var content = new FormUrlEncodedContent(pairs);
@@ -69,21 +61,38 @@ namespace Site.Controllers
                 }
                 else
                 {
-                    TokenApp token = new TokenApp();
-                    token.Salvar(new Token
-                    {
-                        DataExpiracao = Convert.ToDateTime(tokenDictionary[".expires"]),
-                        Usuario = model.Email,
-                        Valor = tokenDictionary["access_token"].ToString()
-                    });
-                    Session["token"]= string.Format("{0} - {1}", DateTime.Now < Convert.ToDateTime(tokenDictionary[".expires"]) ? "OK" : "NOK"  , tokenDictionary["access_token"]);
                     status = SignInStatus.Success;
-                    FormsAuthentication.SetAuthCookie(model.Email, false);
-                    Thread.CurrentPrincipal = HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                                        {
-                                            new Claim(ClaimTypes.Name, model.Email)
-                                        }, "someAuthTypeName"));
-                    Session["usuario"] = model.Email;
+                    Token token = new Token();
+                    token.Usuario = model.Usuario;
+                    token.Valor = tokenDictionary["access_token"];
+                    token.DataExpiracao = Convert.ToDateTime(tokenDictionary[".expires"]);
+                    Session["token"] = token;
+                    //using (var clientToken = new HttpClient())
+                    //{
+                    //    var serialized = JsonConvert.SerializeObject(token);
+                    //    var contentToken = new StringContent(serialized, Encoding.UTF8, "application/json");
+                    //    Task<HttpResponseMessage> responseMessage = clientToken.PostAsync("http://localhost:35480/api/Token/", contentToken);
+
+                    //    ViewBag.Result = result;
+                    //}
+
+                    using (var clientToken = new HttpClient())
+                    {
+                        var uri = new Uri("http://localhost:35480/api/Token/");
+                        var json = JsonConvert.SerializeObject(token);
+                        var contentToken = new StringContent(json, Encoding.UTF8, "text/json");
+                        //Task<HttpResponseMessage> responseToken = new HttpResponseMessage();
+                        Task<HttpResponseMessage> responseMessage = clientToken.PostAsync(uri, content);
+                        //if (responseToken.IsSuccessStatusCode)
+                        //{
+                        //    await DisplayAlert("Alert", "Post executado!", "Ok");
+                        //}
+                        //else
+                        //{
+                        //    await DisplayAlert("Alert", "Post não executado!", "Ok");
+                        //}
+                    }
+
                 }
             }
 

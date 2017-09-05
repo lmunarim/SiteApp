@@ -10,16 +10,16 @@ namespace serviceApi.Providers
 {
     public class ApplicationOAuthProvider : OAuthAuthorizationServerProvider
     {
-        public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
+        public override Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
         {
             context.Validated();
-            //return Task.FromResult<object>(null);
+            return Task.FromResult<object>(null);
         }
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
 
-            if (context.UserName.ToLower() == "teste@teste.com" && context.Password == "123456")
+            if (context.UserName.ToLower() == "teste" && context.Password == "123456")
             {
                 var identity = new ClaimsIdentity(context.Options.AuthenticationType);
 
@@ -38,11 +38,11 @@ namespace serviceApi.Providers
                 return;
             }
         }
-        public override async Task TokenEndpoint(OAuthTokenEndpointContext context)
+        public override Task TokenEndpoint(OAuthTokenEndpointContext context)
         {
             foreach (var property in context.Properties.Dictionary)
                 context.AdditionalResponseParameters.Add(property.Key, property.Value);
-            //async return Task.FromResult<object>(null);
+             return Task.FromResult<object>(null);
         }
         private static AuthenticationProperties GetProperties(IdentityUser usuario, IEnumerable<Claim> claims)
         {
