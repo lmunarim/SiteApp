@@ -1,4 +1,4 @@
-Projeto Web (Site)
+﻿Projeto Web (Site)
 
 Contém página de login e pagina de produto onde será mostrada a listagem de produtos.
 
@@ -30,3 +30,11 @@ Utilizado Ef6 para persistência de dados e migrations , Seed de produtos : Conf
 Banco de dados criado em arquivo.
 
 Banco de dados: ..\SiteApp\serviceApi\App_Data\DBProduto.mdf
+
+
+p_ackages_ --> renomear para packages e colocar na pasta rais, please!!
+
+DBProduto_ponto_mdf.TXT --> Renomear para DBProduto.mdf
+DBProduto_log_pontoldf.TXT --> Renomear para DBProduto.ldf
+
+Esses arquivos de banco de dados precisam ser adicionados dentro da pasta App_Data do projeto serviceApi.
