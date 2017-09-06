@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading;
-using System.Web;
+using System.Net.Http;
 using System.Web.Mvc;
+using Newtonsoft.Json;
 using Site.Models;
-using Site.Repositorio;
 
 namespace Site.Controllers
 {
@@ -17,97 +13,55 @@ namespace Site.Controllers
         // [Authorize]
         public ActionResult Index()
         {
-            if (User.Identity.IsAuthenticated || Session["usuario"] != null)
+            if (Session["token"] != null)
             {
-                string usuario = Session["usuario"].ToString();
-
-                ProdutoApp produto = new ProdutoApp();
-
-                TokenApp tokenApp = new TokenApp();
-                Token token = tokenApp.Get(usuario);
-                if (DateTime.Now > token.DataExpiracao)
-                {
+                if(!ValidarToken())
                     return RedirectToAction("Login", "Account");
+
+                IEnumerable<ProdutoModels> lstProduto = null;
+
+                using (var client = new HttpClient())
+                {
+                    System.Net.Http.HttpResponseMessage response = client.GetAsync("http://localhost:35480/api/Produto").Result;
+
+                    //se retornar com sucesso busca os dados
+                    if (response.IsSuccessStatusCode)
+                    {
+                        //Pegando os dados do Rest e armazenando na variável usuários
+                        lstProduto = response.Content.ReadAsAsync<IEnumerable<ProdutoModels>>().Result;
+                    }
                 }
-                
-                IEnumerable<ProdutoModels> lstProduto = produto.Listar();
 
                 return View(lstProduto);
             }
             else
-                return View();
+                return RedirectToAction("Login", "Account");
         }
 
-        // GET: Produto/Details/5
-        public ActionResult Details(int id)
+        private bool ValidarToken()
         {
-            return View();
-        }
+            Token token = (Token)Session["token"];
+            string result = "";
 
-        // GET: Produto/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Produto/Create
-        [HttpPost]
-        public ActionResult Create(FormCollection collection)
-        {
-            try
+            using (var client = new HttpClient())
             {
-                // TODO: Add insert logic here
+                System.Net.Http.HttpResponseMessage response = client.GetAsync("http://localhost:35480/api/Token/" + token.Usuario).Result;
 
-                return RedirectToAction("Index");
+                //se retornar com sucesso busca os dados
+                if (response.IsSuccessStatusCode)
+                {
+                    //Pegando os dados do Rest e armazenando na variável usuários
+                    result = response.Content.ReadAsAsync<string>().Result;
+                }
             }
-            catch
+
+            if (String.IsNullOrEmpty(result) || result == "NOK")
             {
-                return View();
+                return false;
             }
-        }
+            else
+                return true;
 
-        // GET: Produto/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Produto/Edit/5
-        [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: Produto/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Produto/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
         }
     }
 }

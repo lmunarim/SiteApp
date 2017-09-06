@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Site.Models;
 
-namespace Site.Repositorio
+namespace serviceApi
 {
     public class TokenApp
     {
@@ -22,9 +21,14 @@ namespace Site.Repositorio
             db.SaveChanges();
         }
 
+        public bool Get()
+        {
+            return true;
+        }
+
         public Token Get(string usuario)
         {
-            return db.Tokens.Where(x => x.Usuario == usuario).OrderByDescending(p => p.DataExpiracao).FirstOrDefault();
+            return db.Tokens.Where(x => x.Usuario == usuario).OrderByDescending(p => p.Id).FirstOrDefault();
         }
     }
 }

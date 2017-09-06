@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Site.Models;
 
-namespace Site.Repositorio
+namespace serviceApi
 {
     public class ProdutoApp
     {
@@ -15,19 +14,19 @@ namespace Site.Repositorio
             db = new DBProduto();
         }
 
-        public void Salvar(ProdutoModels produto)
+        public void Salvar(ProdutoModel produto)
         {
             db.Produtos.Add(produto);
             db.SaveChanges();
         }
-        public IEnumerable<ProdutoModels> Listar()
+        public IEnumerable<ProdutoModel> Listar()
         {
             return db.Produtos.ToList();
         }
 
-        public void Alterar(ProdutoModels produto)
+        public void Alterar(ProdutoModel produto)
         {
-            ProdutoModels pSalvar = db.Produtos.Where(x => x.Id == produto.Id).First();
+            ProdutoModel pSalvar = db.Produtos.Where(x => x.Id == produto.Id).First();
             pSalvar.Nome = produto.Nome;
             pSalvar.Preco = produto.Preco;
             db.SaveChanges();
@@ -35,8 +34,8 @@ namespace Site.Repositorio
 
         public void Excluir(int id)
         {
-            ProdutoModels pExcluir = db.Produtos.Where(x => x.Id == id).First();
-            db.Set<ProdutoModels>().Remove(pExcluir);
+            ProdutoModel pExcluir = db.Produtos.Where(x => x.Id == id).First();
+            db.Set<ProdutoModel>().Remove(pExcluir);
             db.SaveChanges(); 
         }
     }

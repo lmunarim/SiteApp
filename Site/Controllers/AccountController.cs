@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
-using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.Security;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
 using Newtonsoft.Json;
 using Site.Models;
-using Site.Repositorio;
 
 namespace Site.Controllers
 {
@@ -54,11 +46,11 @@ namespace Site.Controllers
                 var pairs = new List<KeyValuePair<string, string>>
                     {
                         new KeyValuePair<string, string>( "grant_type", "password" ),
-                        new KeyValuePair<string, string>( "username", model.Email),
+                        new KeyValuePair<string, string>( "username", model.Usuario),
                         new KeyValuePair<string, string> ( "Password", model.Password )
                     };
                 var content = new FormUrlEncodedContent(pairs);
-                HttpResponseMessage response = client.PostAsync("http://localhost:35480/token", content).Result;
+                HttpResponseMessage response = client.PostAsync("http://localhost:35480/Token", content).Result;
                 var result = response.Content.ReadAsStringAsync().Result;
                 Dictionary<string, string> tokenDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
 
@@ -69,21 +61,25 @@ namespace Site.Controllers
                 }
                 else
                 {
-                    TokenApp token = new TokenApp();
-                    token.Salvar(new Token
-                    {
-                        DataExpiracao = Convert.ToDateTime(tokenDictionary[".expires"]),
-                        Usuario = model.Email,
-                        Valor = tokenDictionary["access_token"].ToString()
-                    });
-                    Session["token"]= string.Format("{0} - {1}", DateTime.Now < Convert.ToDateTime(tokenDictionary[".expires"]) ? "OK" : "NOK"  , tokenDictionary["access_token"]);
                     status = SignInStatus.Success;
-                    FormsAuthentication.SetAuthCookie(model.Email, false);
-                    Thread.CurrentPrincipal = HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                                        {
-                                            new Claim(ClaimTypes.Name, model.Email)
-                                        }, "someAuthTypeName"));
-                    Session["usuario"] = model.Email;
+                    Token token = new Token();
+                    token.Usuario = model.Usuario;
+                    token.Valor = tokenDictionary["access_token"];
+                    token.DataExpiracao = Convert.ToDateTime(tokenDictionary[".expires"]);
+                    Session["token"] = token;
+
+                    // Gravamos o novo token no dataBase
+                    var values = new Dictionary<string, string>()
+                            {
+                                {"Usuario", "teste"},
+                                {"Valor", tokenDictionary["access_token"]},
+                                {"DataExpiracao", Convert.ToDateTime(tokenDictionary[".expires"]).ToString()}
+                            };
+                    content = new FormUrlEncodedContent(values);
+
+                    HttpResponseMessage response2 = client.PostAsync("http://localhost:35480/api/Token", content).Result;
+                    response2.EnsureSuccessStatusCode();
+
                 }
             }
 
