@@ -38,3 +38,5 @@ DBProduto_ponto_mdf.TXT --> Renomear para DBProduto.mdf
 DBProduto_log_pontoldf.TXT --> Renomear para DBProduto.ldf
 
 Esses arquivos de banco de dados precisam ser adicionados dentro da pasta App_Data do projeto serviceApi.
+
+OBS: é necessário restaurar os pacotes através do nuget package manager. (Clicando com o botão direito na solução em Restore package manager)
